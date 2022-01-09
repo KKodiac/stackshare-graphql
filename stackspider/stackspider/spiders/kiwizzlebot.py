@@ -21,8 +21,8 @@ class KiwizzlebotSpider(Spider):
         "CONCURRENT_REQUESTS" : 30,
         "DOWNLOAD_DELAY" : 0.1,
         "ITEM_PIPELINES": {
-            # "stackspider.pipelines.RawPipeline": 100,
-            "stackspider.pipelines.KiwizzlePipeline": 300,  # 호스팅 하면 해당 파이프라인 다시 추가하기
+            "stackspider.pipelines.RawPipeline": 100,
+            "stackspider.pipelines.KiwizzlePipeline": 300,  
         }
     }
 

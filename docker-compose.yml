@@ -4,8 +4,7 @@ volumes:
     name: mongodb-data
 networks:
   sw-stack:
-    external:
-      name: mon_net 
+    driver: bridge
 
 services:
   mongodb:
@@ -18,15 +17,9 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: example
     ports:
-      - 27020:27017
+      - 27017:27017
     networks:
         - sw-stack 
-    # healthcheck:
-    #   test: echo 'db.runCommand("ping").ok' | mongo 10.10.10.60:27017/test --quiet
-    #   interval: 30s
-    #   timeout: 10s
-    #   retries: 3
-
   mongo-express:
     image: mongo-express
     container_name: mongodb-express
@@ -45,14 +38,8 @@ services:
     depends_on:
       - mongodb
     ports:
-      - 8090:8081
-  # healthcheck:
-  #   test:  wget --quiet --tries=3 --spider http://admin:admin123@10.10.10.60:8081 || exit 1
-  #   interval: 30s
-  #   timeout: 10s
-  #   retries: 3
-  #   restart: unless-stopped
- 
+      - 8081:8081
+
   spider_1:
     image: seanhong2000/app
     build: .
@@ -74,16 +61,17 @@ services:
       - mongodb
     networks:
       - sw-stack
-
-  # 번역 자동화 할거면 이런식으로 할 생각이다.
-  # translate:
-  #   image: app
-  #   build: .
-  #   command: python translate.py
-  #   volumes:
-  #     - .:/backend
-  #   depends_on: 
-  #     - mongodb
+  
+  spider_3:
+    image: app
+    build: .
+    command: bash -c "cd stackspider && scrapy crawl kiwizzlebot"
+    volumes:
+      - .:/backend
+    depends_on: 
+      - mongodb
+    networks:
+      - sw-stack
   
 
   web:
@@ -99,38 +87,16 @@ services:
       USERNAME: root
       PASSWORD: example
     ports:
-      - "8010:8000"
+      - "8000:8000"
     expose: 
-      - "8010"
+      - "8000"
     depends_on:
       - mongodb
     networks:
       - sw-stack
-    deploy:
-      replicas: 3
-      resources:
-        limits:
-          cpus: '0.001'
-          memory: 50M
-
-  # migration:
-  #   build: .
-  #   image: app
-  #   command: python manage.py migrate
-  #   volumes:
-  #     - .:/StackLounge
-  #   links:
-  #     - mongodb
-  #   depends_on:
-  #     - make_migrations
-
-  # make_migrations:
-  #   build: .
-  #   image: app
-  #   command: python manage.py makemigrations
-  #   volumes:
-  #     - .:/StackLounge
-  #   links:
-  #     - mongodb
-  #   depends_on:
-  #     - mongodb
+    # deploy:
+    #   replicas: 3
+    #   resources:
+    #     limits:
+    #       cpus: '0.001'
+    #       memory: 50M
