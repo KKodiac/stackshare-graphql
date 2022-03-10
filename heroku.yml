@@ -1,0 +1,7 @@
+build: 
+  docker:
+    api: docker-compose.yml
+
+run:
+  api: docker-compose up -d 
+
